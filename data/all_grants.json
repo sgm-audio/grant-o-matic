@@ -1,0 +1,362 @@
+[
+  {
+    "id": "d1d0a6dc",
+    "program_name": "Research and Creation",
+    "administering_agency": "Canada Council for the Arts",
+    "description": "Research and Creation grant under the Explore and Create program. Supports explore and create initiatives across the Canadian arts sector.",
+    "eligibility_criteria": {
+      "artist_type": [
+        "individual",
+        "group",
+        "organization"
+      ],
+      "residency_requirements": [
+        "Canadian citizen",
+        "Permanent resident"
+      ],
+      "genre_restrictions": [
+        "All genres"
+      ],
+      "career_stage": [
+        "Emerging",
+        "Established",
+        "Any"
+      ],
+      "project_type": [
+        "Creation",
+        "Production",
+        "Research",
+        "Touring"
+      ]
+    },
+    "deadline_info": {
+      "frequency": "Varies by program",
+      "next_deadline": null,
+      "application_window": "Check specific program for deadlines"
+    },
+    "funding_details": {
+      "min_amount": 1000,
+      "max_amount": 50000,
+      "average_award": 25500,
+      "funding_type": "Grant",
+      "requires_matching_funds": false,
+      "matching_requirements": null
+    },
+    "application_requirements": [
+      "Project description",
+      "Budget",
+      "Work samples",
+      "Artist bio/CV",
+      "Supporting materials"
+    ],
+    "assessment_criteria": [
+      "Artistic merit",
+      "Project feasibility",
+      "Impact and significance",
+      "Viability"
+    ],
+    "url": "https://canadacouncil.ca/funding/grants/explore-and-create",
+    "last_updated": "2026-05-07",
+    "status": "Active"
+  },
+  {
+    "id": "f16cd202",
+    "program_name": "Concept to Realization",
+    "administering_agency": "Canada Council for the Arts",
+    "description": "Concept to Realization grant under the Explore and Create program. Supports explore and create initiatives across the Canadian arts sector.",
+    "eligibility_criteria": {
+      "artist_type": [
+        "individual",
+        "group",
+        "organization"
+      ],
+      "residency_requirements": [
+        "Canadian citizen",
+        "Permanent resident"
+      ],
+      "genre_restrictions": [
+        "All genres"
+      ],
+      "career_stage": [
+        "Emerging",
+        "Established",
+        "Any"
+      ],
+      "project_type": [
+        "Creation",
+        "Production",
+        "Research",
+        "Touring"
+      ]
+    },
+    "deadline_info": {
+      "frequency": "Varies by program",
+      "next_deadline": null,
+      "application_window": "Check specific program for deadlines"
+    },
+    "funding_details": {
+      "min_amount": 1000,
+      "max_amount": 50000,
+      "average_award": 25500,
+      "funding_type": "Grant",
+      "requires_matching_funds": false,
+      "matching_requirements": null
+    },
+    "application_requirements": [
+      "Project description",
+      "Budget",
+      "Work samples",
+      "Artist bio/CV",
+      "Supporting materials"
+    ],
+    "assessment_criteria": [
+      "Artistic merit",
+      "Project feasibility",
+      "Impact and significance",
+      "Viability"
+    ],
+    "url": "https://canadacouncil.ca/funding/grants/explore-and-create",
+    "last_updated": "2026-05-07",
+    "status": "Active"
+  },
+  {
+    "id": "8b3db45e",
+    "program_name": "Engage and Sustain",
+    "administering_agency": "Canada Council for the Arts",
+    "description": "Supports engage and sustain initiatives across the Canadian arts sector.",
+    "eligibility_criteria": {
+      "artist_type": [
+        "individual",
+        "group",
+        "organization"
+      ],
+      "residency_requirements": [
+        "Canadian citizen",
+        "Permanent resident"
+      ],
+      "genre_restrictions": [
+        "All genres"
+      ],
+      "career_stage": [
+        "Emerging",
+        "Established",
+        "Any"
+      ],
+      "project_type": [
+        "Creation",
+        "Production",
+        "Research",
+        "Touring"
+      ]
+    },
+    "deadline_info": {
+      "frequency": "Varies by program",
+      "next_deadline": null,
+      "application_window": "Check specific program for deadlines"
+    },
+    "funding_details": {
+      "min_amount": 5000,
+      "max_amount": 100000,
+      "average_award": 52500,
+      "funding_type": "Grant",
+      "requires_matching_funds": true,
+      "matching_requirements": "Varies by specific program"
+    },
+    "application_requirements": [
+      "Project description",
+      "Budget",
+      "Work samples",
+      "Artist bio/CV",
+      "Supporting materials"
+    ],
+    "assessment_criteria": [
+      "Artistic merit",
+      "Project feasibility",
+      "Impact and significance",
+      "Viability"
+    ],
+    "url": "https://canadacouncil.ca/funding/grants/engage-and-sustain",
+    "last_updated": "2026-05-07",
+    "status": "Active"
+  },
+  {
+    "id": "4a05f9a1",
+    "program_name": "Creating, Knowing and Sharing: The Arts and Cultures of First Nations, Inuit and M\u00e9tis Peoples",
+    "administering_agency": "Canada Council for the Arts",
+    "description": "Supports creating, knowing and sharing: the arts and cultures of first nations, inuit and m\u00e9tis peoples initiatives across the Canadian arts sector.",
+    "eligibility_criteria": {
+      "artist_type": [
+        "individual",
+        "group",
+        "organization"
+      ],
+      "residency_requirements": [
+        "Canadian citizen",
+        "Permanent resident"
+      ],
+      "genre_restrictions": [
+        "All genres"
+      ],
+      "career_stage": [
+        "Emerging",
+        "Established",
+        "Any"
+      ],
+      "project_type": [
+        "Creation",
+        "Production",
+        "Research",
+        "Touring"
+      ]
+    },
+    "deadline_info": {
+      "frequency": "Varies by program",
+      "next_deadline": null,
+      "application_window": "Check specific program for deadlines"
+    },
+    "funding_details": {
+      "min_amount": 5000,
+      "max_amount": 50000,
+      "average_award": 27500,
+      "funding_type": "Grant",
+      "requires_matching_funds": false,
+      "matching_requirements": null
+    },
+    "application_requirements": [
+      "Project description",
+      "Budget",
+      "Work samples",
+      "Artist bio/CV",
+      "Supporting materials"
+    ],
+    "assessment_criteria": [
+      "Artistic merit",
+      "Project feasibility",
+      "Impact and significance",
+      "Viability"
+    ],
+    "url": "https://canadacouncil.ca/funding/grants",
+    "last_updated": "2026-05-07",
+    "status": "Active"
+  },
+  {
+    "id": "44b77af2",
+    "program_name": "Supporting Artistic Practice",
+    "administering_agency": "Canada Council for the Arts",
+    "description": "Supports supporting artistic practice initiatives across the Canadian arts sector.",
+    "eligibility_criteria": {
+      "artist_type": [
+        "individual",
+        "group",
+        "organization"
+      ],
+      "residency_requirements": [
+        "Canadian citizen",
+        "Permanent resident"
+      ],
+      "genre_restrictions": [
+        "All genres"
+      ],
+      "career_stage": [
+        "Emerging",
+        "Established",
+        "Any"
+      ],
+      "project_type": [
+        "Creation",
+        "Production",
+        "Research",
+        "Touring"
+      ]
+    },
+    "deadline_info": {
+      "frequency": "Varies by program",
+      "next_deadline": null,
+      "application_window": "Check specific program for deadlines"
+    },
+    "funding_details": {
+      "min_amount": 1000,
+      "max_amount": 50000,
+      "average_award": 25500,
+      "funding_type": "Grant",
+      "requires_matching_funds": true,
+      "matching_requirements": "Varies by specific program"
+    },
+    "application_requirements": [
+      "Project description",
+      "Budget",
+      "Work samples",
+      "Artist bio/CV",
+      "Supporting materials"
+    ],
+    "assessment_criteria": [
+      "Artistic merit",
+      "Project feasibility",
+      "Impact and significance",
+      "Viability"
+    ],
+    "url": "https://canadacouncil.ca/funding/grants/supporting-artistic-practice",
+    "last_updated": "2026-05-07",
+    "status": "Active"
+  },
+  {
+    "id": "2b8d4f3a",
+    "program_name": "Arts Across Canada and Abroad",
+    "administering_agency": "Canada Council for the Arts",
+    "description": "Supports arts across canada and abroad initiatives across the Canadian arts sector.",
+    "eligibility_criteria": {
+      "artist_type": [
+        "individual",
+        "group",
+        "organization"
+      ],
+      "residency_requirements": [
+        "Canadian citizen",
+        "Permanent resident"
+      ],
+      "genre_restrictions": [
+        "All genres"
+      ],
+      "career_stage": [
+        "Emerging",
+        "Established",
+        "Any"
+      ],
+      "project_type": [
+        "Creation",
+        "Production",
+        "Research",
+        "Touring"
+      ]
+    },
+    "deadline_info": {
+      "frequency": "Varies by program",
+      "next_deadline": null,
+      "application_window": "Check specific program for deadlines"
+    },
+    "funding_details": {
+      "min_amount": 1000,
+      "max_amount": 50000,
+      "average_award": 25500,
+      "funding_type": "Grant",
+      "requires_matching_funds": true,
+      "matching_requirements": "Varies by specific program"
+    },
+    "application_requirements": [
+      "Project description",
+      "Budget",
+      "Work samples",
+      "Artist bio/CV",
+      "Supporting materials"
+    ],
+    "assessment_criteria": [
+      "Artistic merit",
+      "Project feasibility",
+      "Impact and significance",
+      "Viability"
+    ],
+    "url": "https://canadacouncil.ca/funding/grants",
+    "last_updated": "2026-05-07",
+    "status": "Active"
+  }
+]
