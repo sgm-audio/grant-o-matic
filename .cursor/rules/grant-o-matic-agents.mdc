@@ -1,0 +1,15 @@
+---
+description: Grant-O-Matic Cloud Agent conventions for phased prompt-chain work
+globs:
+alwaysApply: true
+---
+
+# Grant-O-Matic agent rules
+
+- Follow `AGENTS.md` and the active prompt under `docs/agent-chain/prompts/`.
+- Never invent grant programs, amounts, deadlines, or eligibility. Cite URLs from `docs/agent-chain/SOURCES.md` only after fetch confirmation.
+- Verify/audit prompts (`*a-verify*`, `*a-audit*`, `99-*`, `META-*`) must not add features; report findings and apply minimal fixes only when verification fails.
+- New modules require unit and API/integration tests. Scraper tests use recorded fixtures, not live network calls in CI.
+- Do not skip tests. Do not commit secrets. Do not force-push or rewrite shared history.
+- Before opening a PR, run the verify commands listed in the active phase prompt.
+- Update `docs/agent-chain/HANDOFF.md` at phase end.

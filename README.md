@@ -132,6 +132,8 @@ export GRANT_DATA_PATH=/path/to/data
 - [ ] Bilingual (FR/EN) UI
 - [ ] SR&ED tax credit eligibility checker
 
+These items (plus bootstrap, application assistant, ops/CI, and full audit) are packaged as Cursor Cloud Agent prompts in [`docs/agent-chain/`](docs/agent-chain/README.md). See [`docs/agent-chain/WIRING.md`](docs/agent-chain/WIRING.md) to automate them. Do not treat the chain as executed until each phase PR lands.
+
 ---
 
 ## License
