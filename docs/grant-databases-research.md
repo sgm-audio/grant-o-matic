@@ -39,7 +39,7 @@
   - Genre restrictions (if any)
 
 ### 3. Musicaction
-- Website: https://musicaction.com/
+- Website: https://musicaction.ca/
 - Key Programs (Francophone focus):
   - Développement de carrière artistique
   - Développement de l'industrie musicale
@@ -74,7 +74,7 @@
   - Assessment criteria
 
 ### 5. BC Arts Council
-- Website: https://bcarts council.ca/
+- Website: https://www.bcartscouncil.ca/
 - Key Programs:
   - Project Assistance
   - Career Development
