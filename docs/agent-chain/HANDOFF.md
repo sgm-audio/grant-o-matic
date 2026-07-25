@@ -6,7 +6,7 @@ Copy this file to `HANDOFF.md` on the first phase run and keep it updated.
 
 - **Last completed phase:** `00a-verify-bootstrap`
 - **Last verify status:** `pass`
-- **Active branch / PR:** `cursor/phase-00a-verify-bootstrap-adf9` (audit); subject PR https://github.com/SGM-Studios/grant-o-matic/pull/2
+- **Active branch / PR:** `cursor/phase-00a-verify-bootstrap-adf9` — https://github.com/SGM-Studios/grant-o-matic/pull/3 (audit); subject https://github.com/SGM-Studios/grant-o-matic/pull/2
 - **Blocked:** `none`
 - **Label recommendation:** add `phase-00-verified` on PR #2 / main after merging bootstrap + this audit
 
