@@ -52,7 +52,7 @@ export default function About() {
               🇨🇦 Canada-Specific Expertise
             </h3>
             <p className="text-gray-700">
-              Unlike generic grant databases, we focus exclusively on Canadian funding opportunities, tax credit programs, and industry-specific resources that matter to Canadian creators.
+              Unlike generic grant databases, we focus on Canadian funding opportunities that matter to Canadian creators — currently catalogued from the Canada Council for the Arts.
             </p>
           </div>
         </div>
@@ -83,19 +83,23 @@ export default function About() {
           Data Sources
         </h2>
         <p className="text-gray-700 mb-4">
-          We continuously monitor and update our database from these Canadian funding sources:
+          Our current catalog is loaded from these Canadian funding sources:
         </p>
         <ul className="list-disc list-inside space-y-2 text-gray-700 pl-5">
-          <li>Canada Council for the Arts</li>
-          <li>FACTOR (Foundation Assisting Canadian Talent on Recordings)</li>
-          <li>Musicaction</li>
-          <li>Ontario Arts Council (OAC)</li>
-          <li>BC Arts Council</li>
-          <li>Telefilm Canada</li>
-          <li>Provincial arts councils across Canada</li>
-          <li>Municipal arts funding programs</li>
-          <li>Tax credit programs (federal and provincial)</li>
+          <li>
+            <a
+              href="https://canadacouncil.ca/funding/grants"
+              className="text-blue-600 hover:underline"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Canada Council for the Arts
+            </a>
+          </li>
         </ul>
+        <p className="text-gray-600 text-sm mt-4">
+          Additional agencies will appear here only after their programs are present in the loaded grant data.
+        </p>
       </div>
     </div>
   );

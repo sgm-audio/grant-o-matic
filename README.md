@@ -8,7 +8,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![Canada](https://img.shields.io/badge/for-Canadian%20Creators-red?logo=icloud&logoColor=white)](https://canadacouncil.ca)
 
-AI-powered grant matching for Canadian artists and creators. Matches your project to the right funding opportunities from FACTOR, Canada Council, provincial arts councils, and more.
+AI-powered grant matching for Canadian artists and creators. Matches your project to funding opportunities currently loaded in the catalog — today that is [Canada Council for the Arts](https://canadacouncil.ca/funding/grants) programs.
 
 ---
 
@@ -16,10 +16,12 @@ AI-powered grant matching for Canadian artists and creators. Matches your projec
 
 ### Option A: Docker (recommended)
 ```bash
-docker compose up
+docker compose up --build
 # Frontend: http://localhost:5173
 # API:      http://localhost:8000/docs
 ```
+
+Compose starts the FastAPI API (`GRANT_DATA_PATH=/app/data`) and the Vite frontend. Grant JSON is mounted from `./data` into the API container.
 
 ### Option B: Manual (two terminals)
 
@@ -50,11 +52,10 @@ Deploy the API as a Uvicorn server (port 8000) and the frontend as static files 
 4. **Apply with confidence** — use the budget justification generator to strengthen your application
 
 ### Supported grant sources
-- FACTOR (Juried Sound Recording, Artist Development, etc.)
-- Canada Council for the Arts (Explore & Create, Engage & Sustain, etc.)
-- Provincial arts councils (OAC, BC Arts Council, etc.)
-- Telefilm Canada, CMF, SOCAN Foundation
-- Federal and provincial tax credit programs
+Agencies present in the loaded grant data (`data/all_grants.json`):
+- [Canada Council for the Arts](https://canadacouncil.ca/funding/grants) (Explore & Create, Engage & Sustain, and related programs in the dataset)
+
+Additional agencies will be listed here only after their programs are loaded into the catalog.
 
 ---
 

@@ -5,16 +5,18 @@ from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
-import json
 import os
+import sys
 from datetime import datetime
 
 # Import our modules
-import sys
-import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from ai_model.enhanced_matching_engine import EnhancedGrantMatchingEngine, GrantMatch
 from deadline_tracker import DeadlineTracker
+try:
+    from api.grant_data import load_grants, resolve_grants_file
+except ImportError:  # pragma: no cover - script-style imports (python api/test_api.py)
+    from grant_data import load_grants, resolve_grants_file
 # We'll import the scraper when we implement it fully
 
 app = FastAPI(
@@ -75,19 +77,14 @@ async def startup_event():
     """Initialize the matching engine on startup"""
     global matching_engine
     matching_engine = EnhancedGrantMatchingEngine()
-    
-    # Load existing grant data if available
-    data_path = os.environ.get(
-        "GRANT_DATA_PATH",
-        os.path.join(os.path.dirname(__file__), "..", "data")
-    )
-    grants_file = os.path.join(data_path, "all_grants.json")
-    
-    if os.path.exists(grants_file):
-        matching_engine.load_grants_from_file(grants_file)
-        print(f"Loaded grants from {grants_file}")
+
+    grants_file = resolve_grants_file()
+    grants = load_grants()
+    if grants:
+        matching_engine.grants = grants
+        print(f"Loaded {len(grants)} grants from {grants_file}")
     else:
-        print("No grant data found. Please run the scraper first.")
+        print(f"No grant data found at {grants_file}. Please run the scraper first.")
 
 @app.get("/")
 async def root():
