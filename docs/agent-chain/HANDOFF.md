@@ -6,7 +6,7 @@ Copy this file to `HANDOFF.md` on the first phase run and keep it updated.
 
 - **Last completed phase:** `00-bootstrap`
 - **Last verify status:** `pass`
-- **Active branch / PR:** `cursor/phase-00-bootstrap-adf9`
+- **Active branch / PR:** `cursor/phase-00-bootstrap-adf9` — https://github.com/SGM-Studios/grant-o-matic/pull/2
 - **Blocked:** `none`
 
 ## Environment notes
