@@ -24,113 +24,30 @@ const fetchGrantMatches = async (formData: GrantMatcherFormValues): Promise<Gran
     });
     return result.grants;
   } catch {
-    // Fall back to mock data if backend is unavailable
+    // Fall back to offline demo data (agencies present in loaded catalog only)
     await new Promise(resolve => setTimeout(resolve, 1500));
     const mockGrants = [
     {
-      "id": "grant001",
-      "program_name": "Juried Sound Recording",
-      "administering_agency": "FACTOR",
-      "description": "Support for the creation and production of sound recordings by Canadian artists.",
-      "eligibility_criteria": {
-        "artist_type": ["individual", "group"],
-        "residency_requirements": ["Canadian citizen", "Permanent resident"],
-        "genre_restrictions": ["All genres"],
-        "career_stage": ["Emerging", "Established"],
-        "project_type": ["Recording", "Production"]
-      },
-      "deadline_info": {
-        "frequency": "Quarterly",
-        "next_deadline": "2024-03-15",
-        "application_window": "2024-01-01 to 2024-03-15"
-      },
-      "funding_details": {
-        "min_amount": 5000,
-        "max_amount": 50000,
-        "average_award": 20000,
-        "funding_type": "Grant",
-        "requires_matching_funds": true,
-        "matching_requirements": "1:1 matching funds required"
-      },
-      "application_requirements": [
-        "Project description",
-        "Budget",
-        "Work samples (audio)",
-        "Artist bio",
-        "Marketing plan",
-        "Letters of support"
-      ],
-      "assessment_criteria": [
-        "Artistic merit",
-        "Market potential",
-        "Project feasibility"
-      ],
-      "url": "https://factor.ca/programs/juried-sound-recording/",
-      "last_updated": "2024-01-15",
-      "status": "Active"
-    },
-    {
-      "id": "grant002",
-      "program_name": "Artist Development",
-      "administering_agency": "FACTOR",
-      "description": "Emerging artist development funding for recording and market development.",
-      "eligibility_criteria": {
-        "artist_type": ["individual", "group"],
-        "residency_requirements": ["Canadian citizen", "Permanent resident"],
-        "genre_restrictions": ["All genres"],
-        "career_stage": ["Emerging"],
-        "project_type": ["Recording", "Marketing", "Touring"]
-      },
-      "deadline_info": {
-        "frequency": "Rolling",
-        "next_deadline": "2024-06-30",
-        "application_window": "Ongoing"
-      },
-      "funding_details": {
-        "min_amount": 2000,
-        "max_amount": 5000,
-        "average_award": 3500,
-        "funding_type": "Grant",
-        "requires_matching_funds": true,
-        "matching_requirements": "25% artist contribution (can be sweat equity)"
-      },
-      "application_requirements": [
-        "Project description",
-        "Budget",
-        "Work samples",
-        "Artist bio",
-        "Marketing plan"
-      ],
-      "assessment_criteria": [
-        "Artistic merit",
-        "Career development potential",
-        "Project feasibility"
-      ],
-      "url": "https://factor.ca/programs/artist-development/",
-      "last_updated": "2024-01-10",
-      "status": "Active"
-    },
-    {
-      "id": "grant003",
-      "program_name": "Explore and Create: Research and Creation",
+      "id": "d1d0a6dc",
+      "program_name": "Research and Creation",
       "administering_agency": "Canada Council for the Arts",
-      "description": "Grants for artists to research and create new work.",
+      "description": "Research and Creation grant under the Explore and Create program. Supports explore and create initiatives across the Canadian arts sector.",
       "eligibility_criteria": {
-        "artist_type": ["individual", "group"],
+        "artist_type": ["individual", "group", "organization"],
         "residency_requirements": ["Canadian citizen", "Permanent resident"],
         "genre_restrictions": ["All genres"],
-        "career_stage": ["Any"],
-        "project_type": ["Creation", "Research"]
+        "career_stage": ["Emerging", "Established", "Any"],
+        "project_type": ["Creation", "Production", "Research", "Touring"]
       },
       "deadline_info": {
-        "frequency": "Rolling",
+        "frequency": "Varies by program",
         "next_deadline": null,
-        "application_window": "Ongoing"
+        "application_window": "Check specific program for deadlines"
       },
       "funding_details": {
         "min_amount": 1000,
-        "max_amount": 25000,
-        "average_award": 8000,
+        "max_amount": 50000,
+        "average_award": 25500,
         "funding_type": "Grant",
         "requires_matching_funds": false,
         "matching_requirements": null
@@ -147,7 +64,48 @@ const fetchGrantMatches = async (formData: GrantMatcherFormValues): Promise<Gran
         "Project feasibility",
         "Contribution to the arts"
       ],
-      "url": "https://canadacouncil.ca/funding/grants/explore-and-create-research-and-creation",
+      "url": "https://canadacouncil.ca/funding/grants",
+      "last_updated": "2024-01-05",
+      "status": "Active"
+    },
+    {
+      "id": "f16cd202",
+      "program_name": "Concept to Realization",
+      "administering_agency": "Canada Council for the Arts",
+      "description": "Support for artists to develop and realize artistic projects from concept through production.",
+      "eligibility_criteria": {
+        "artist_type": ["individual", "group", "organization"],
+        "residency_requirements": ["Canadian citizen", "Permanent resident"],
+        "genre_restrictions": ["All genres"],
+        "career_stage": ["Emerging", "Established", "Any"],
+        "project_type": ["Creation", "Production", "Research"]
+      },
+      "deadline_info": {
+        "frequency": "Varies by program",
+        "next_deadline": null,
+        "application_window": "Check specific program for deadlines"
+      },
+      "funding_details": {
+        "min_amount": 1000,
+        "max_amount": 50000,
+        "average_award": 25500,
+        "funding_type": "Grant",
+        "requires_matching_funds": false,
+        "matching_requirements": null
+      },
+      "application_requirements": [
+        "Project description",
+        "Budget",
+        "Work samples",
+        "Artist bio",
+        "Supporting material"
+      ],
+      "assessment_criteria": [
+        "Artistic merit",
+        "Project feasibility",
+        "Contribution to the arts"
+      ],
+      "url": "https://canadacouncil.ca/funding/grants",
       "last_updated": "2024-01-05",
       "status": "Active"
     }

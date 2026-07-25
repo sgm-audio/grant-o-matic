@@ -4,6 +4,8 @@ Simple test for the Grant-O-Matic API
 from fastapi.testclient import TestClient
 import sys
 import os
+import unittest
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 # Sample grant data for testing
@@ -98,11 +100,11 @@ def create_test_app():
     # Import here to avoid circular imports
     from main import app
     from ai_model.enhanced_matching_engine import EnhancedGrantMatchingEngine
-    
+
     # Override the matching engine with our test data
     import main
     main.matching_engine = EnhancedGrantMatchingEngine(SAMPLE_GRANTS)
-    
+
     return app
 
 def test_root_endpoint():
@@ -116,19 +118,55 @@ def test_root_endpoint():
     assert "Grant-O-Matic API" in data["message"]
 
 def test_health_endpoint():
-    """Test the health endpoint"""
+    """Test the health endpoint reports grants_loaded"""
     test_app = create_test_app()
     client = TestClient(test_app)
     response = client.get("/health")
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "healthy"
+    assert data["grants_loaded"] == len(SAMPLE_GRANTS)
+    assert data["grants_loaded"] > 0
+
+def test_grants_endpoint():
+    """Smoke test for listing grants"""
+    test_app = create_test_app()
+    client = TestClient(test_app)
+    response = client.get("/grants")
+    assert response.status_code == 200
+    data = response.json()
+    assert "grants" in data
+    assert "total_count" in data
+    assert data["total_count"] == len(SAMPLE_GRANTS)
+    assert len(data["grants"]) == len(SAMPLE_GRANTS)
+    assert data["grants"][0]["id"] == "grant001"
+
+def test_health_with_repo_grant_data():
+    """Confirm /health grants_loaded matches data/all_grants.json via GRANT_DATA_PATH."""
+    try:
+        from api.grant_data import load_grants
+    except ImportError:
+        from grant_data import load_grants
+    from ai_model.enhanced_matching_engine import EnhancedGrantMatchingEngine
+    import main
+
+    repo_data = os.path.join(os.path.dirname(__file__), "..", "data")
+    os.environ["GRANT_DATA_PATH"] = os.path.abspath(repo_data)
+    grants = load_grants()
+    assert len(grants) > 0
+
+    main.matching_engine = EnhancedGrantMatchingEngine(grants)
+    client = TestClient(main.app)
+    response = client.get("/health")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["grants_loaded"] == len(grants)
 
 def test_match_endpoint():
     """Test the match endpoint with sample data"""
     test_app = create_test_app()
     client = TestClient(test_app)
-    
+
     response = client.post("/match", json={
         "project_description": "I am an emerging electronic music producer based in Toronto working on my debut EP",
         "artist_type": "individual",
@@ -157,5 +195,23 @@ def test_match_endpoint():
 if __name__ == "__main__":
     test_root_endpoint()
     test_health_endpoint()
+    test_grants_endpoint()
+    test_health_with_repo_grant_data()
     test_match_endpoint()
+
+    # Also run grant_data unit tests
+    loader = unittest.TestLoader()
+    suite = loader.loadTestsFromName("test_grant_data")
+    result = unittest.TextTestRunner(verbosity=1).run(suite)
+    if not result.wasSuccessful():
+        raise SystemExit(1)
+
+    # Compose file structural check (no Docker daemon required)
+    from pathlib import Path
+    scripts_dir = Path(__file__).resolve().parent.parent / "scripts"
+    sys.path.insert(0, str(scripts_dir))
+    from validate_compose import main as validate_compose_main
+    if validate_compose_main() != 0:
+        raise SystemExit(1)
+
     print("All tests passed!")
