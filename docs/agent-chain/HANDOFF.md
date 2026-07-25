@@ -4,10 +4,11 @@ Copy this file to `HANDOFF.md` on the first phase run and keep it updated.
 
 ## Current state
 
-- **Last completed phase:** `00-bootstrap`
+- **Last completed phase:** `00a-verify-bootstrap`
 - **Last verify status:** `pass`
-- **Active branch / PR:** `cursor/phase-00-bootstrap-adf9` — https://github.com/SGM-Studios/grant-o-matic/pull/2
+- **Active branch / PR:** `cursor/phase-00a-verify-bootstrap-adf9` (audit); subject PR https://github.com/SGM-Studios/grant-o-matic/pull/2
 - **Blocked:** `none`
+- **Label recommendation:** add `phase-00-verified` on PR #2 / main after merging bootstrap + this audit
 
 ## Environment notes
 
@@ -25,34 +26,38 @@ Copy this file to `HANDOFF.md` on the first phase run and keep it updated.
 ## Tests run (last phase)
 
 ```text
-python3 api/test_api.py                          PASS (smoke /, /health, /grants + grant_data + compose validate)
+# 00a re-run 2026-07-25
+python3 api/test_api.py                          PASS
 python3 .github/workflows/validate_data.py       PASS
 cd frontend && npx tsc --noEmit                  PASS
-cd frontend && npm run lint                      PASS (3 pre-existing unused-var warnings)
+cd frontend && npm run lint                      PASS (3 unused-var warnings)
 cd frontend && npm run build                     PASS
-docker compose config                            PASS
-docker build -t grant-o-matic-api .              PASS (vfs storage driver required in this agent VM)
-docker run smoke: GET /health grants_loaded=6    PASS
+docker build -t grant-o-matic-api .              PASS
+test -f docker-compose.yml                       PASS
 ```
+
+Evidence: `docs/agent-chain/audits/00a-audit.md`
 
 ## Citations added or changed
 
 | Claim | Source URL | Verified (date UTC) |
 |-------|------------|---------------------|
-| Canada Council funding/grants index linked from README + About | https://canadacouncil.ca/funding/grants | 2026-07-25 (HTTP 200 HEAD + WebFetch; Grants index page) |
+| Canada Council funding/grants index linked from README + About | https://canadacouncil.ca/funding/grants | 2026-07-25 (phase 00; not re-fetched in 00a) |
 
 ## Next phase instructions
 
-- **Next phase id:** `00a-verify-bootstrap`
-- **Preconditions met:** yes (implement phase complete; await human `phase-00-approved` before verify automation)
+- **Next phase id:** `01-grant-data-scrapers`
+- **Preconditions met:** pending human label `phase-00-verified` (00a audit PASS; bootstrap approved)
 - **Files the next agent should read first:**
-  - `docs/agent-chain/prompts/00a-verify-bootstrap.prompt.md`
-  - `docker-compose.yml`
-  - `api/grant_data.py`
+  - `docs/agent-chain/prompts/01-grant-data-scrapers.prompt.md`
+  - `docs/agent-chain/audits/00a-audit.md`
+  - `docs/agent-chain/SOURCES.md`
   - `docs/agent-chain/HANDOFF.md`
+  - `scraper/` and `data/all_grants.json`
 
 ## Open risks
 
 - Agent VM Docker may need `--storage-driver=vfs`; GitHub Actions should use default overlay2.
-- Frontend offline mock in `GrantMatcher.tsx` still synthesizes match scores when API is down; agencies limited to Canada Council only.
+- Home page still advertises stub roadmap features (deadlines / application assistant) — cleanup deferred beyond 00a.
+- Frontend offline mock synthesizes scores when API is down; agencies limited to Canada Council only.
 - Sample FACTOR grants remain in `api/test_api.py` fixtures only (not user-facing catalog claims).
