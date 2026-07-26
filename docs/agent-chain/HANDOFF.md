@@ -4,55 +4,55 @@ Copy this file to `HANDOFF.md` on the first phase run and keep it updated.
 
 ## Current state
 
-- **Last completed phase:** `00-bootstrap`
-- **Last verify status:** `pass`
-- **Active branch / PR:** `cursor/phase-00-bootstrap-adf9` — https://github.com/SGM-Studios/grant-o-matic/pull/2
+- **Last completed phase:** `01-grant-data-scrapers` (in progress / PR open)
+- **Last verify status:** `pass` (local verify commands)
+- **Active branch / PR:** `cursor/phase-01-grant-data-scrapers-adf9`
 - **Blocked:** `none`
+- **Note:** User asked to “begin phase 2”; chain phase `02-deadline-alerts` requires `01a` first, so this run implemented **phase 01**.
 
 ## Environment notes
 
-- Python / Node versions verified: Python 3.12.3; Node v22.14.0; npm 10.9.7
-- Secrets required next (names only, never values): none for phase 01 (scrapers use fixtures in CI)
-- Data path (`GRANT_DATA_PATH`): defaults to repo `data/`; Docker compose sets `/app/data` and mounts `./data`
+- Python / Node versions verified: Python 3.12.3; Node (frontend toolchain as in CI)
+- Secrets required next (names only, never values): none for 01a; phase 02 may need email provider env vars if email alerts are chosen
+- Data path (`GRANT_DATA_PATH`): repo `data/` / Docker `/app/data`
 
 ## Data / product facts
 
-- Grants loaded count: `6`
-- Agencies present in data: `Canada Council for the Arts`
-- Deadlines populated (yes/no + count): no concrete `next_deadline` values (all `null`; frequency text only)
-- Claims that must not appear in UI until data exists: FACTOR, Musicaction, OAC, BC Arts Council, Telefilm, CMF, SOCAN Foundation, municipal programs, federal/provincial tax credits
+- Grants loaded count: `9`
+- Agencies present in data: `Canada Council for the Arts`, `FACTOR`
+- Deadlines populated (yes/no + count): partial — **2** FACTOR programs have `next_deadline` (`2026-09-10` JSR Album; `2027-01-14` Video fiscal cutoff). CCA deadlines intentionally `null` (point to official deadlines page).
+- Claims that must not appear in UI until data exists: Musicaction, OAC, BC Arts Council, Telefilm, CMF, SOCAN Foundation, municipal programs, federal/provincial tax credits
 
 ## Tests run (last phase)
 
 ```text
-python3 api/test_api.py                          PASS (smoke /, /health, /grants + grant_data + compose validate)
+python3 scraper/test_scraper.py                  PASS
+python3 api/test_api.py                          PASS (includes /scrape fixtures reload)
 python3 .github/workflows/validate_data.py       PASS
-cd frontend && npx tsc --noEmit                  PASS
-cd frontend && npm run lint                      PASS (3 pre-existing unused-var warnings)
-cd frontend && npm run build                     PASS
-docker compose config                            PASS
-docker build -t grant-o-matic-api .              PASS (vfs storage driver required in this agent VM)
-docker run smoke: GET /health grants_loaded=6    PASS
+cd frontend && npx tsc --noEmit && npm run lint && npm run build
+                                                 (run before PR)
 ```
 
 ## Citations added or changed
 
 | Claim | Source URL | Verified (date UTC) |
 |-------|------------|---------------------|
-| Canada Council funding/grants index linked from README + About | https://canadacouncil.ca/funding/grants | 2026-07-25 (HTTP 200 HEAD + WebFetch; Grants index page) |
+| Canada Council grants programs in catalog | https://canadacouncil.ca/funding/grants | 2026-07-26 (HTTP 200 + program pages fetched for fixtures) |
+| FACTOR artist programs / amounts / deadlines in catalog | https://www.factor.ca/ | 2026-07-26 (HTTP 200 + program pages fetched for fixtures) |
 
 ## Next phase instructions
 
-- **Next phase id:** `00a-verify-bootstrap`
-- **Preconditions met:** yes (implement phase complete; await human `phase-00-approved` before verify automation)
+- **Next phase id:** `01a-audit-grant-data`
+- **Preconditions met:** after human review + `phase-01-approved`
 - **Files the next agent should read first:**
-  - `docs/agent-chain/prompts/00a-verify-bootstrap.prompt.md`
-  - `docker-compose.yml`
-  - `api/grant_data.py`
+  - `docs/agent-chain/prompts/01a-audit-grant-data.prompt.md`
+  - `scraper/` + `scraper/fixtures/`
+  - `data/all_grants.json`
   - `docs/agent-chain/HANDOFF.md`
 
 ## Open risks
 
-- Agent VM Docker may need `--storage-driver=vfs`; GitHub Actions should use default overlay2.
-- Frontend offline mock in `GrantMatcher.tsx` still synthesizes match scores when API is down; agencies limited to Canada Council only.
-- Sample FACTOR grants remain in `api/test_api.py` fixtures only (not user-facing catalog claims).
+- CCA funding amounts left `null` (not on scraped program overview pages); do not invent.
+- FACTOR Video max uses first “project maximum” phrase ($20,000 Artist 2); Artist 3 $30,000 also on page.
+- Live `POST /scrape` without fixtures hits the network; CI uses `use_fixtures=true`.
+- Phase 02 still blocked until 01a verifies.

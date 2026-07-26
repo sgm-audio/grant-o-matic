@@ -1,3 +1,1 @@
-"""
-Grant-O-Matic Web Scraper Package
-"""
+"""Grant-O-Matic scrapers (Canada Council, FACTOR, and shared pipeline)."""

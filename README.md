@@ -8,7 +8,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![Canada](https://img.shields.io/badge/for-Canadian%20Creators-red?logo=icloud&logoColor=white)](https://canadacouncil.ca)
 
-AI-powered grant matching for Canadian artists and creators. Matches your project to funding opportunities currently loaded in the catalog — today that is [Canada Council for the Arts](https://canadacouncil.ca/funding/grants) programs.
+AI-powered grant matching for Canadian artists and creators. Matches your project to funding opportunities in the loaded catalog — currently [Canada Council for the Arts](https://canadacouncil.ca/funding/grants) and [FACTOR](https://www.factor.ca/).
 
 ---
 
@@ -53,7 +53,10 @@ Deploy the API as a Uvicorn server (port 8000) and the frontend as static files 
 
 ### Supported grant sources
 Agencies present in the loaded grant data (`data/all_grants.json`):
-- [Canada Council for the Arts](https://canadacouncil.ca/funding/grants) (Explore & Create, Engage & Sustain, and related programs in the dataset)
+- [Canada Council for the Arts](https://canadacouncil.ca/funding/grants) — Explore and Create, Engage and Sustain, Creating Knowing and Sharing, Supporting Artistic Practice, Arts Across Canada and Abroad
+- [FACTOR](https://www.factor.ca/) — Artist Development, Juried Sound Recording (Album / Single-EP), Video
+
+Amounts and deadlines are taken from official program pages when present; otherwise fields are `null`. Refresh via `POST /scrape` (use `?use_fixtures=true` offline/CI).
 
 Additional agencies will be listed here only after their programs are loaded into the catalog.
 
@@ -93,7 +96,8 @@ Additional agencies will be listed here only after their programs are loaded int
 | `POST` | `/match` | Match a project to grants |
 | `GET` | `/grants` | List all grants |
 | `GET` | `/grants/{id}` | Grant detail |
-| `POST` | `/scrape` | Trigger grant data scrape |
+| `POST` | `/scrape` | Run CCA + FACTOR scrapers and reload grants (`?use_fixtures=true` for offline) |
+| `GET` | `/scrape/status` | Latest scrape job status |
 
 **`POST /match`** example:
 ```json
@@ -126,7 +130,7 @@ export GRANT_DATA_PATH=/path/to/data
 
 ## Roadmap
 
-- [ ] Live integrated scraping from Canada Council / FACTOR
+- [x] Live integrated scraping from Canada Council / FACTOR (fixture-tested; `POST /scrape`)
 - [ ] Deadline alert system (email/calendar)
 - [ ] Multi-LLM matching via Groq/Anthropic
 - [ ] User accounts and saved matches

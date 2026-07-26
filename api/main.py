@@ -71,6 +71,24 @@ class GrantListResponse(BaseModel):
 
 # Global variable to hold our matching engine
 matching_engine = None
+scrape_status: Dict[str, Any] = {
+    "status": "idle",
+    "last_run": None,
+    "last_error": None,
+    "grants_count": 0,
+    "agencies": [],
+}
+
+
+def reload_matching_engine_from_disk() -> int:
+    """Reload grants from GRANT_DATA_PATH into the matching engine."""
+    global matching_engine
+    if matching_engine is None:
+        matching_engine = EnhancedGrantMatchingEngine()
+    grants = load_grants()
+    matching_engine.grants = grants
+    return len(grants)
+
 
 @app.on_event("startup")
 async def startup_event():
@@ -79,10 +97,9 @@ async def startup_event():
     matching_engine = EnhancedGrantMatchingEngine()
 
     grants_file = resolve_grants_file()
-    grants = load_grants()
-    if grants:
-        matching_engine.grants = grants
-        print(f"Loaded {len(grants)} grants from {grants_file}")
+    count = reload_matching_engine_from_disk()
+    if count:
+        print(f"Loaded {count} grants from {grants_file}")
     else:
         print(f"No grant data found at {grants_file}. Please run the scraper first.")
 
@@ -183,36 +200,80 @@ async def get_grant(grant_id: str):
     return grant
 
 @app.post("/scrape")
-async def trigger_scrape(background_tasks: BackgroundTasks):
+async def trigger_scrape(
+    background_tasks: BackgroundTasks,
+    use_fixtures: bool = False,
+):
     """
-    Trigger a background scrape of grant databases
+    Trigger a background scrape of grant databases and reload the matching engine.
+
+    Set ``use_fixtures=true`` for offline/CI runs (no live network).
     """
-    # In a real implementation, this would start the scraper
-    # For now, we'll just return a message
-    background_tasks.add_task(run_scraper_background)
+    if scrape_status.get("status") == "running":
+        return {
+            "message": "Scrape already in progress",
+            "status": "running",
+            "scrape": scrape_status,
+        }
+
+    scrape_status["status"] = "queued"
+    scrape_status["last_error"] = None
+    background_tasks.add_task(run_scraper_background, use_fixtures)
     return {
         "message": "Scraping triggered in background",
-        "status": "started"
+        "status": "started",
+        "use_fixtures": use_fixtures,
     }
 
-async def run_scraper_background():
-    """Background task to run the scraper"""
-    # This would import and run the actual scraper
-    # For now, we'll just log that it would run
-    print("Background scraper would run here...")
-    # In reality: 
-    # from scraper.canada_council import CanadaCouncilScraper
-    # scraper = CanadaCouncilScraper()
-    # grants = scraper.scrape_all_grants()
-    # Then save and reload matching engine
+
+@app.get("/scrape/status")
+async def get_scrape_status():
+    """Return the latest scrape job status."""
+    return scrape_status
+
+
+async def run_scraper_background(use_fixtures: bool = False):
+    """Background task to run scrapers, persist JSON, and reload the engine."""
+    from scraper.pipeline import run_scrape_and_persist
+
+    scrape_status["status"] = "running"
+    scrape_status["last_run"] = datetime.now().isoformat()
+    try:
+        result = run_scrape_and_persist(use_fixtures=use_fixtures)
+        count = reload_matching_engine_from_disk()
+        scrape_status.update(
+            {
+                "status": "completed",
+                "last_error": None,
+                "grants_count": count,
+                "agencies": result.get("agencies", []),
+                "path": result.get("path"),
+            }
+        )
+        print(
+            f"Scrape completed: {count} grants from {', '.join(result.get('agencies', []))}"
+        )
+    except Exception as exc:  # pragma: no cover - exercised via API tests with fixtures
+        scrape_status["status"] = "failed"
+        scrape_status["last_error"] = str(exc)
+        print(f"Scrape failed: {exc}")
+
 
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
+    agencies = sorted(
+        {
+            g.get("administering_agency")
+            for g in (matching_engine.grants if matching_engine and matching_engine.grants else [])
+            if g.get("administering_agency")
+        }
+    )
     return {
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
-        "grants_loaded": len(matching_engine.grants) if matching_engine and matching_engine.grants else 0
+        "grants_loaded": len(matching_engine.grants) if matching_engine and matching_engine.grants else 0,
+        "agencies": agencies,
     }
 
 if __name__ == "__main__":

@@ -52,7 +52,7 @@ export default function About() {
               🇨🇦 Canada-Specific Expertise
             </h3>
             <p className="text-gray-700">
-              Unlike generic grant databases, we focus on Canadian funding opportunities that matter to Canadian creators — currently catalogued from the Canada Council for the Arts.
+              Unlike generic grant databases, we focus on Canadian funding opportunities that matter to Canadian creators — currently catalogued from the Canada Council for the Arts and FACTOR.
             </p>
           </div>
         </div>
@@ -94,6 +94,16 @@ export default function About() {
               rel="noreferrer"
             >
               Canada Council for the Arts
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://www.factor.ca/"
+              className="text-blue-600 hover:underline"
+              target="_blank"
+              rel="noreferrer"
+            >
+              FACTOR
             </a>
           </li>
         </ul>
