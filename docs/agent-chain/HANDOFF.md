@@ -4,9 +4,9 @@ Copy this file to `HANDOFF.md` on the first phase run and keep it updated.
 
 ## Current state
 
-- **Last completed phase:** `01-grant-data-scrapers` (in progress / PR open)
+- **Last completed phase:** `01-grant-data-scrapers` (PR open; await review)
 - **Last verify status:** `pass` (local verify commands)
-- **Active branch / PR:** `cursor/phase-01-grant-data-scrapers-adf9`
+- **Active branch / PR:** `cursor/phase-01-grant-data-scrapers-adf9` — https://github.com/SGM-Studios/grant-o-matic/pull/4
 - **Blocked:** `none`
 - **Note:** User asked to “begin phase 2”; chain phase `02-deadline-alerts` requires `01a` first, so this run implemented **phase 01**.
 
