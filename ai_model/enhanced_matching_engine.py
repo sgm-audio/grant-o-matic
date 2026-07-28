@@ -281,7 +281,7 @@ class EnhancedGrantMatchingEngine:
         complexity_factors.append(req_complexity)
         
         # Check funding amount (very high amounts might be more competitive)
-        max_amount = funding.get('max_amount', 0)
+        max_amount = funding.get('max_amount') or 0
         if max_amount > 100000:
             complexity_factors.append(0.2)
         elif max_amount > 50000:

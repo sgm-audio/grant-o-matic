@@ -1,237 +1,235 @@
 """
-Canada Council for the Arts Grant Scraper
+Canada Council for the Arts grant scraper.
+
+Supports live HTTP fetches and offline fixture HTML (preferred in CI).
+Does not invent funding amounts or deadlines; unknown fields are null.
 """
+from __future__ import annotations
+
+import logging
+import time
+from pathlib import Path
+from typing import Dict, List, Optional
+from urllib.parse import urlparse
+
 import requests
 from bs4 import BeautifulSoup
-import json
-import time
-from typing import List, Dict, Optional
-import logging
+
+try:
+    from scraper.common import (
+        DEFAULT_RATE_LIMIT_SECONDS,
+        DEFAULT_TIMEOUT,
+        USER_AGENT,
+        absolute_url,
+        default_deadline_info,
+        empty_funding_details,
+        generate_grant_id,
+        normalize_whitespace,
+        today_iso,
+    )
+except ImportError:  # pragma: no cover
+    from common import (
+        DEFAULT_RATE_LIMIT_SECONDS,
+        DEFAULT_TIMEOUT,
+        USER_AGENT,
+        absolute_url,
+        default_deadline_info,
+        empty_funding_details,
+        generate_grant_id,
+        normalize_whitespace,
+        today_iso,
+    )
 
 logger = logging.getLogger(__name__)
 
+PROGRAM_PATH_PREFIX = "/funding/grants/"
+KNOWN_PROGRAM_SLUGS = {
+    "explore-and-create",
+    "engage-and-sustain",
+    "creating-knowing-sharing",
+    "supporting-artistic-practice",
+    "arts-across-canada-and-abroad",
+}
+
+
 class CanadaCouncilScraper:
-    def __init__(self):
+    def __init__(
+        self,
+        *,
+        rate_limit_seconds: float = DEFAULT_RATE_LIMIT_SECONDS,
+        session: Optional[requests.Session] = None,
+    ):
         self.base_url = "https://canadacouncil.ca"
         self.grants_url = f"{self.base_url}/funding/grants"
-        self.session = requests.Session()
-        self.session.headers.update({
-            'User-Agent': 'Grant-O-Matic/1.0 (Educational Tool for Canadian Artists)'
-        })
-    
-    def fetch_grants_page(self) -> Optional[BeautifulSoup]:
-        """Fetch the main grants page"""
+        self.rate_limit_seconds = rate_limit_seconds
+        self.session = session or requests.Session()
+        self.session.headers.update({"User-Agent": USER_AGENT})
+
+    def fetch_html(self, url: str) -> Optional[str]:
         try:
-            response = self.session.get(self.grants_url, timeout=10)
+            response = self.session.get(url, timeout=DEFAULT_TIMEOUT)
             response.raise_for_status()
-            return BeautifulSoup(response.content, 'html.parser')
-        except requests.RequestException as e:
-            logger.error(f"Error fetching grants page: {e}")
+            return response.text
+        except requests.RequestException as exc:
+            logger.error("Error fetching %s: %s", url, exc)
             return None
-    
-    def extract_grant_links(self, soup: BeautifulSoup) -> List[str]:
-        """Extract links to individual grant pages"""
-        grant_links = []
-        # Look for links to grant programs
-        # This selector will need adjustment based on actual site structure
-        links = soup.find_all('a', href=True)
-        for link in links:
-            href = link['href']
-            # Filter for grant-related links
-            if '/funding/grants/' in href and href not in grant_links:
-                full_url = href if href.startswith('http') else f"{self.base_url}{href}"
-                grant_links.append(full_url)
-        return grant_links
-    
-    def scrape_grant_details(self, grant_url: str) -> Optional[Dict]:
-        """Scrape details from an individual grant page"""
-        try:
-            response = self.session.get(grant_url, timeout=10)
-            response.raise_for_status()
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
-            # Extract grant information - selectors will need adjustment
-            grant_data = {
-                'id': self._generate_id(grant_url),
-                'program_name': self._extract_program_name(soup),
-                'administering_agency': 'Canada Council for the Arts',
-                'description': self._extract_description(soup),
-                'eligibility_criteria': self._extract_eligibility(soup),
-                'deadline_info': self._extract_deadline_info(soup),
-                'funding_details': self._extract_funding_details(soup),
-                'application_requirements': self._extract_application_requirements(soup),
-                'assessment_criteria': self._extract_assessment_criteria(soup),
-                'url': grant_url,
-                'last_updated': time.strftime('%Y-%m-%d'),
-                'status': 'Active'
-            }
-            
-            return grant_data
-        except Exception as e:
-            logger.error(f"Error scraping grant details from {grant_url}: {e}")
-            return None
-    
-    def _generate_id(self, url: str) -> str:
-        """Generate a unique ID for the grant"""
-        import hashlib
-        return hashlib.md5(url.encode()).hexdigest()[:8]
-    
-    def _extract_program_name(self, soup: BeautifulSoup) -> str:
-        """Extract program name from page"""
-        # Try common selectors for program title
-        selectors = ['h1', 'h2', '.grant-title', '.program-name']
-        for selector in selectors:
-            element = soup.select_one(selector)
-            if element and element.get_text(strip=True):
-                return element.get_text(strip=True)
-        return "Unknown Program"
-    
-    def _extract_description(self, soup: BeautifulSoup) -> str:
-        """Extract program description"""
-        # Look for description in common locations
-        selectors = [
-            '.grant-description',
-            '.program-description',
-            'div[property="description"]',
-            '.field-name-body',
-            'main p'
-        ]
-        for selector in selectors:
-            element = soup.select_one(selector)
-            if element and element.get_text(strip=True):
-                return element.get_text(strip=True)[:500]  # Limit length
-        return "Description not available"
-    
-    def _extract_eligibility(self, soup: BeautifulSoup) -> Dict:
-        """Extract eligibility criteria"""
-        eligibility = {}
-        # This would need to be customized based on actual page structure
-        # Look for sections containing eligibility information
-        eligibility_sections = soup.find_all(text=lambda text: text and 'eligibility' in text.lower())
-        # For now, return placeholder structure
-        eligibility = {
-            'artist_type': ['individual', 'group'],
-            'residency_requirements': ['Canadian citizen', 'Permanent resident'],
-            'genre_restrictions': ['All genres'],
-            'career_stage': ['Any'],
-            'project_type': ['Various']
+
+    def parse_program_links(self, html: str) -> List[Dict[str, str]]:
+        """Extract program URLs from the grants index HTML."""
+        soup = BeautifulSoup(html, "html.parser")
+        found: Dict[str, str] = {}
+        for link in soup.find_all("a", href=True):
+            href = link["href"]
+            full = absolute_url(self.base_url, href)
+            path = urlparse(full).path.rstrip("/")
+            if not path.startswith(PROGRAM_PATH_PREFIX.rstrip("/")):
+                continue
+            slug = path.split("/")[-1]
+            if slug in {"grants", "deadlines"}:
+                continue
+            if slug not in KNOWN_PROGRAM_SLUGS and "/funding/grants/" not in full:
+                continue
+            # Prefer known program pages; still accept other grant program paths
+            if slug == "grants":
+                continue
+            text = normalize_whitespace(link.get_text(" ", strip=True))
+            if full not in found or (text and text.lower() != "learn more about this program"):
+                if slug in KNOWN_PROGRAM_SLUGS or path.count("/") >= 3:
+                    if slug in KNOWN_PROGRAM_SLUGS:
+                        found[full] = text or slug
+        # Ensure known programs appear even if link text was generic
+        for slug in KNOWN_PROGRAM_SLUGS:
+            url = f"{self.base_url}/funding/grants/{slug}"
+            found.setdefault(url, slug.replace("-", " ").title())
+        return [{"url": url, "link_text": name} for url, name in sorted(found.items())]
+
+    def parse_program_page(self, html: str, url: str) -> Dict:
+        soup = BeautifulSoup(html, "html.parser")
+        program_name = self._extract_program_name(soup)
+        description = self._extract_description(soup)
+        return {
+            "id": generate_grant_id(url),
+            "program_name": program_name,
+            "administering_agency": "Canada Council for the Arts",
+            "description": description,
+            "eligibility_criteria": self._extract_eligibility(soup),
+            "deadline_info": default_deadline_info(
+                frequency="See Canada Council deadlines page",
+                next_deadline=None,
+                application_window="https://canadacouncil.ca/funding/grants/deadlines",
+            ),
+            "funding_details": empty_funding_details(),
+            "application_requirements": self._extract_listish(
+                soup,
+                keywords=("application", "require", "submit"),
+                fallback=[
+                    "See program guidelines on the Canada Council website",
+                    "Application via Canada Council portal",
+                ],
+            ),
+            "assessment_criteria": self._extract_listish(
+                soup,
+                keywords=("assessment", "criteria", "evaluation"),
+                fallback=["See program assessment criteria on the Canada Council website"],
+            ),
+            "url": url,
+            "last_updated": today_iso(),
+            "status": "Active",
         }
-        return eligibility
-    
-    def _extract_deadline_info(self, soup: BeautifulSoup) -> Dict:
-        """Extract deadline information"""
-        deadline_info = {
-            'frequency': 'Varies',
-            'next_deadline': None,
-            'application_window': None
-        }
-        # Look for date information
-        date_elements = soup.find_all(text=lambda text: text and any(
-            month in text.lower() for month in 
-            ['january', 'february', 'march', 'april', 'may', 'june',
-             'july', 'august', 'september', 'october', 'november', 'december']
-        ))
-        # Placeholder implementation
-        return deadline_info
-    
-    def _extract_funding_details(self, soup: BeautifulSoup) -> Dict:
-        """Extract funding details"""
-        funding_details = {
-            'min_amount': 0,
-            'max_amount': 0,
-            'average_award': 0,
-            'funding_type': 'Grant',
-            'requires_matching_funds': False,
-            'matching_requirements': None
-        }
-        # Look for money amounts in text
-        import re
-        text = soup.get_text()
-        money_matches = re.findall(r'\$[\d,]+(?:\.\d{2})?', text)
-        if money_matches:
-            amounts = []
-            for match in money_matches:
-                try:
-                    amount = float(match.replace('$', '').replace(',', ''))
-                    amounts.append(amount)
-                except ValueError:
+
+    def scrape_all_grants(
+        self,
+        *,
+        fixture_dir: Optional[str | Path] = None,
+        max_programs: Optional[int] = None,
+    ) -> List[Dict]:
+        """
+        Scrape grants from live site or local fixtures.
+
+        When fixture_dir is set, no network calls are made.
+        Expected fixture layout:
+          grants_index.html
+          <program-slug>.html
+        """
+        fixture_path = Path(fixture_dir) if fixture_dir else None
+        if fixture_path:
+            index_html = (fixture_path / "grants_index.html").read_text(encoding="utf-8")
+        else:
+            index_html = self.fetch_html(self.grants_url)
+            if not index_html:
+                return []
+
+        programs = self.parse_program_links(index_html)
+        if max_programs is not None:
+            programs = programs[:max_programs]
+
+        grants: List[Dict] = []
+        for item in programs:
+            url = item["url"]
+            slug = urlparse(url).path.rstrip("/").split("/")[-1]
+            if fixture_path:
+                page_file = fixture_path / f"{slug}.html"
+                if not page_file.is_file():
+                    logger.warning("Missing fixture for %s", slug)
                     continue
-            if amounts:
-                funding_details['min_amount'] = min(amounts)
-                funding_details['max_amount'] = max(amounts)
-                funding_details['average_award'] = sum(amounts) / len(amounts)
-        return funding_details
-    
-    def _extract_application_requirements(self, soup: BeautifulSoup) -> List[str]:
-        """Extract application requirements"""
-        requirements = []
-        # Look for lists or sections about requirements
-        req_sections = soup.find_all(text=lambda text: text and (
-            'application' in text.lower() and 
-            ('require' in text.lower() or 'need' in text.lower())
-        ))
-        # Placeholder - would need more sophisticated extraction
-        common_requirements = [
-            'Project description',
-            'Budget',
-            'Work samples',
-            'Artist CV/bio'
-        ]
-        return common_requirements
-    
-    def _extract_assessment_criteria(self, soup: BeautifulSoup) -> List[str]:
-        """Extract assessment criteria"""
-        criteria = []
-        # Look for assessment/judging criteria
-        criteria_sections = soup.find_all(text=lambda text: text and (
-            'assessment' in text.lower() or 
-            'criteria' in text.lower() or
-            'judging' in text.lower()
-        ))
-        # Placeholder
-        common_criteria = [
-            'Artistic merit',
-            'Viability',
-            'Impact',
-            'Feasibility'
-        ]
-        return common_criteria
-    
-    def scrape_all_grants(self) -> List[Dict]:
-        """Main method to scrape all grants"""
-        logger.info("Starting Canada Council for the Arts grant scraping...")
-        
-        # Fetch main grants page
-        soup = self.fetch_grants_page()
-        if not soup:
-            logger.error("Failed to fetch grants page")
-            return []
-        
-        # Extract grant links
-        grant_links = self.extract_grant_links(soup)
-        logger.info(f"Found {len(grant_links)} potential grant links")
-        
-        # Scrape each grant
-        grants = []
-        for i, link in enumerate(grant_links[:10]):  # Limit for testing
-            logger.info(f"Scraping grant {i+1}/{min(len(grant_links), 10)}: {link}")
-            grant_data = self.scrape_grant_details(link)
-            if grant_data:
-                grants.append(grant_data)
-            # Be respectful with rate limiting
-            time.sleep(1)
-        
-        logger.info(f"Successfully scraped {len(grants)} grants")
+                html = page_file.read_text(encoding="utf-8")
+            else:
+                html = self.fetch_html(url)
+                if not html:
+                    continue
+                time.sleep(self.rate_limit_seconds)
+            grants.append(self.parse_program_page(html, url))
         return grants
 
-# Example usage
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    scraper = CanadaCouncilScraper()
-    grants = scraper.scrape_all_grants()
-    
-    # Save to JSON file
-    with open('/var/home/SGM/dev/the-canada-creator-cog/grant-o-matic/data/canada_council_grants.json', 'w') as f:
-        json.dump(grants, f, indent=2)
-    
-    print(f"Scraped {len(grants)} grants from Canada Council for the Arts")
+    def _extract_program_name(self, soup: BeautifulSoup) -> str:
+        for selector in ("h1", "h2", ".grant-title", ".program-name"):
+            element = soup.select_one(selector)
+            if element:
+                text = normalize_whitespace(element.get_text(" ", strip=True))
+                if text:
+                    return text
+        return "Unknown Program"
+
+    def _extract_description(self, soup: BeautifulSoup) -> str:
+        main = soup.find("main") or soup.body or soup
+        for p in main.find_all("p"):
+            text = normalize_whitespace(p.get_text(" ", strip=True))
+            if len(text) >= 60:
+                return text[:800]
+        return "Description not available on parsed page"
+
+    def _extract_eligibility(self, soup: BeautifulSoup) -> Dict:
+        text = soup.get_text(" ", strip=True).lower()
+        artist_type: List[str] = []
+        if "individual" in text:
+            artist_type.append("individual")
+        if "group" in text or "collective" in text:
+            artist_type.append("group")
+        if "organization" in text:
+            artist_type.append("organization")
+        if not artist_type:
+            artist_type = ["individual", "group", "organization"]
+        return {
+            "artist_type": artist_type,
+            "residency_requirements": ["See program guidelines"],
+            "genre_restrictions": ["See program guidelines"],
+            "career_stage": ["See program guidelines"],
+            "project_type": ["See program guidelines"],
+        }
+
+    def _extract_listish(
+        self,
+        soup: BeautifulSoup,
+        *,
+        keywords: tuple[str, ...],
+        fallback: List[str],
+    ) -> List[str]:
+        items: List[str] = []
+        for li in soup.find_all("li"):
+            text = normalize_whitespace(li.get_text(" ", strip=True))
+            low = text.lower()
+            if any(k in low for k in keywords) and 20 <= len(text) <= 240:
+                items.append(text)
+            if len(items) >= 6:
+                break
+        return items or list(fallback)

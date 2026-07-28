@@ -192,12 +192,65 @@ def test_match_endpoint():
     # Check that budget suggestion is included when budget is provided
     assert "budget_suggestion" in first_grant
 
+def test_scrape_endpoint_reloads_grants():
+    """POST /scrape with fixtures persists grants and reloads the engine (no live network)."""
+    import tempfile
+    from ai_model.enhanced_matching_engine import EnhancedGrantMatchingEngine
+    import main
+
+    with tempfile.TemporaryDirectory() as tmp:
+        os.environ["GRANT_DATA_PATH"] = tmp
+        main.matching_engine = EnhancedGrantMatchingEngine([])
+        main.scrape_status.update(
+            {
+                "status": "idle",
+                "last_run": None,
+                "last_error": None,
+                "grants_count": 0,
+                "agencies": [],
+            }
+        )
+        client = TestClient(main.app)
+
+        response = client.post("/scrape?use_fixtures=true")
+        assert response.status_code == 200
+        body = response.json()
+        assert body["status"] == "started"
+        assert body["use_fixtures"] is True
+
+        status = client.get("/scrape/status").json()
+        assert status["status"] == "completed", status
+        assert status["grants_count"] >= 9
+        assert "FACTOR" in status["agencies"]
+        assert "Canada Council for the Arts" in status["agencies"]
+
+        grants_resp = client.get("/grants")
+        assert grants_resp.status_code == 200
+        grants_data = grants_resp.json()
+        assert grants_data["total_count"] >= 9
+        agencies = {g["administering_agency"] for g in grants_data["grants"]}
+        assert "FACTOR" in agencies
+        assert "Canada Council for the Arts" in agencies
+
+        match_resp = client.post(
+            "/match",
+            json={
+                "project_description": "Recording a debut EP as a Canadian musician",
+                "artist_type": "individual",
+                "project_type": "Recording",
+                "limit": 5,
+            },
+        )
+        assert match_resp.status_code == 200
+        assert len(match_resp.json()["grants"]) > 0
+
 if __name__ == "__main__":
     test_root_endpoint()
     test_health_endpoint()
     test_grants_endpoint()
     test_health_with_repo_grant_data()
     test_match_endpoint()
+    test_scrape_endpoint_reloads_grants()
 
     # Also run grant_data unit tests
     loader = unittest.TestLoader()
