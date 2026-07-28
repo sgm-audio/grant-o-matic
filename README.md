@@ -96,6 +96,9 @@ Additional agencies will be listed here only after their programs are loaded int
 | `POST` | `/match` | Match a project to grants |
 | `GET` | `/grants` | List all grants |
 | `GET` | `/grants/{id}` | Grant detail |
+| `GET` | `/deadlines` | Upcoming deadlines from grant `next_deadline` values |
+| `GET` | `/deadlines/alerts` | In-app alert objects for near-term deadlines |
+| `GET` | `/deadlines/export.ics` | Download ICS calendar (primary alert channel) |
 | `POST` | `/scrape` | Run CCA + FACTOR scrapers and reload grants (`?use_fixtures=true` for offline) |
 | `GET` | `/scrape/status` | Latest scrape job status |
 
@@ -131,7 +134,7 @@ export GRANT_DATA_PATH=/path/to/data
 ## Roadmap
 
 - [x] Live integrated scraping from Canada Council / FACTOR (fixture-tested; `POST /scrape`)
-- [ ] Deadline alert system (email/calendar)
+- [x] Deadline alert system (ICS calendar export + `/deadlines` UI)
 - [ ] Multi-LLM matching via Groq/Anthropic
 - [ ] User accounts and saved matches
 - [ ] Bilingual (FR/EN) UI

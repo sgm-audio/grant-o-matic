@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Home from './pages/Home';
 import GrantMatcher from './pages/GrantMatcher';
 import About from './pages/About';
+import Deadlines from './pages/Deadlines';
 
 function App() {
   return (
@@ -22,6 +23,9 @@ function App() {
                 <Link to="/match" className="text-gray-600 hover:text-gray-900 transition-colors">
                   Grant Matcher
                 </Link>
+                <Link to="/deadlines" className="text-gray-600 hover:text-gray-900 transition-colors">
+                  Deadlines
+                </Link>
                 <Link to="/about" className="text-gray-600 hover:text-gray-900 transition-colors">
                   About
                 </Link>
@@ -34,6 +38,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/match" element={<GrantMatcher />} />
+          <Route path="/deadlines" element={<Deadlines />} />
           <Route path="/about" element={<About />} />
         </Routes>
       </main>

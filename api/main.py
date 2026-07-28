@@ -1,7 +1,7 @@
 """
 Grant-O-Matic API Main Module
 """
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
@@ -17,7 +17,6 @@ try:
     from api.grant_data import load_grants, resolve_grants_file
 except ImportError:  # pragma: no cover - script-style imports (python api/test_api.py)
     from grant_data import load_grants, resolve_grants_file
-# We'll import the scraper when we implement it fully
 
 app = FastAPI(
     title="Grant-O-Matic API",
@@ -71,6 +70,7 @@ class GrantListResponse(BaseModel):
 
 # Global variable to hold our matching engine
 matching_engine = None
+deadline_tracker = DeadlineTracker()
 scrape_status: Dict[str, Any] = {
     "status": "idle",
     "last_run": None,
@@ -81,25 +81,29 @@ scrape_status: Dict[str, Any] = {
 
 
 def reload_matching_engine_from_disk() -> int:
-    """Reload grants from GRANT_DATA_PATH into the matching engine."""
-    global matching_engine
+    """Reload grants from GRANT_DATA_PATH into the matching engine and deadline tracker."""
+    global matching_engine, deadline_tracker
     if matching_engine is None:
         matching_engine = EnhancedGrantMatchingEngine()
     grants = load_grants()
     matching_engine.grants = grants
+    deadline_tracker.load_deadlines_from_grants(grants)
     return len(grants)
 
 
 @app.on_event("startup")
 async def startup_event():
-    """Initialize the matching engine on startup"""
+    """Initialize the matching engine and deadline tracker on startup"""
     global matching_engine
     matching_engine = EnhancedGrantMatchingEngine()
 
     grants_file = resolve_grants_file()
     count = reload_matching_engine_from_disk()
     if count:
-        print(f"Loaded {count} grants from {grants_file}")
+        print(
+            f"Loaded {count} grants from {grants_file} "
+            f"({len(deadline_tracker.deadlines)} with next_deadline)"
+        )
     else:
         print(f"No grant data found at {grants_file}. Please run the scraper first.")
 
@@ -274,7 +278,61 @@ async def health_check():
         "timestamp": datetime.now().isoformat(),
         "grants_loaded": len(matching_engine.grants) if matching_engine and matching_engine.grants else 0,
         "agencies": agencies,
+        "deadlines_tracked": len(deadline_tracker.deadlines),
     }
+
+
+@app.get("/deadlines")
+async def list_deadlines(days_ahead: int = 365, include_passed: bool = False):
+    """
+    List grant deadlines loaded from catalog data.
+
+    Default window is 365 days so farther FACTOR intakes remain visible.
+    Dates are never fabricated — only grants with ``next_deadline`` appear.
+    """
+    if include_passed:
+        deadlines = deadline_tracker.get_all_deadlines()
+    else:
+        deadlines = deadline_tracker.get_upcoming_deadlines(days_ahead=days_ahead)
+    return {
+        "deadlines": deadlines,
+        "total_count": len(deadlines),
+        "tracked_count": len(deadline_tracker.deadlines),
+        "days_ahead": days_ahead,
+        "alert_channel": "ics",
+        "timestamp": datetime.now().isoformat(),
+    }
+
+
+@app.get("/deadlines/alerts")
+async def list_deadline_alerts(days_ahead: int = 14):
+    """Generate in-app alert objects for upcoming deadlines."""
+    alerts = deadline_tracker.generate_deadline_alerts(days_ahead=days_ahead)
+    return {
+        "alerts": alerts,
+        "total_count": len(alerts),
+        "days_ahead": days_ahead,
+        "timestamp": datetime.now().isoformat(),
+    }
+
+
+@app.get("/deadlines/export.ics")
+async def export_deadlines_ics(days_ahead: int = 365):
+    """
+    Download upcoming deadlines as an ICS calendar file.
+
+    Primary alert pathway for phase 02 (no email provider secrets required).
+    Optional email delivery can be added later via env-configured provider.
+    """
+    ics = deadline_tracker.generate_ics(days_ahead=days_ahead)
+    return Response(
+        content=ics,
+        media_type="text/calendar; charset=utf-8",
+        headers={
+            "Content-Disposition": 'attachment; filename="grant-o-matic-deadlines.ics"'
+        },
+    )
+
 
 if __name__ == "__main__":
     import uvicorn

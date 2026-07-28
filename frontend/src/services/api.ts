@@ -81,7 +81,38 @@ export const grantApi = {
   getAllGrants: async (skip: number = 0, limit: number = 100): Promise<{ grants: any[]; total_count: number }> => {
     const response = await api.get(`/grants?skip=${skip}&limit=${limit}`);
     return response.data;
-  }
+  },
+
+  getDeadlines: async (
+    daysAhead: number = 365,
+    includePassed: boolean = false,
+  ): Promise<DeadlineListResponse> => {
+    const response = await api.get(
+      `/deadlines?days_ahead=${daysAhead}&include_passed=${includePassed}`,
+    );
+    return response.data;
+  },
 };
+
+export interface DeadlineItem {
+  id: string;
+  program_name: string;
+  administering_agency: string;
+  deadline_date: string;
+  frequency?: string | null;
+  application_window?: string | null;
+  url?: string | null;
+  days_until?: number;
+  status?: string;
+}
+
+export interface DeadlineListResponse {
+  deadlines: DeadlineItem[];
+  total_count: number;
+  tracked_count: number;
+  days_ahead: number;
+  alert_channel: string;
+  timestamp: string;
+}
 
 export default api;
