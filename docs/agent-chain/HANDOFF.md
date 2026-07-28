@@ -6,7 +6,7 @@ Copy this file to `HANDOFF.md` on the first phase run and keep it updated.
 
 - **Last completed phase:** `02-deadline-alerts` (PR open)
 - **Last verify status:** `pass`
-- **Active branch / PR:** `cursor/phase-02-deadline-alerts-adf9`
+- **Active branch / PR:** `cursor/phase-02-deadline-alerts-adf9` — https://github.com/SGM-Studios/grant-o-matic/pull/5
 - **Blocked:** `none`
 - **01a gate:** PASS — `docs/agent-chain/audits/01a-audit.md`; `phase-01-verified` applied on PR #4
 
