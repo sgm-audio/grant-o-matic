@@ -42,13 +42,19 @@ class DeadlineTracker:
         self.deadlines.append(deadline_obj)
         logger.info(f"Added deadline for {program_name}: {deadline_date}")
     
+    def clear(self) -> None:
+        """Remove all tracked deadlines."""
+        self.deadlines = []
+
     def load_deadlines_from_grants(self, grants: List[Dict[str, Any]]) -> None:
         """
-        Load deadlines from a list of grant objects
+        Load deadlines from a list of grant objects.
+        Replaces existing deadlines so reloads stay in sync with grant data.
         
         Args:
             grants: List of grant dictionaries with deadline information
         """
+        self.clear()
         for grant in grants:
             grant_id = grant.get('id')
             program_name = grant.get('program_name')
@@ -212,6 +218,79 @@ class DeadlineTracker:
         
         return alerts
     
+    def get_all_deadlines(self) -> List[Dict[str, Any]]:
+        """
+        Return all tracked deadlines with days_until (negative if passed), soonest first.
+        """
+        today = datetime.date.today()
+        results = []
+        for deadline in self.deadlines:
+            deadline_date = datetime.date.fromisoformat(deadline['deadline_date'])
+            deadline_copy = deadline.copy()
+            deadline_copy['days_until'] = (deadline_date - today).days
+            if deadline_date < today:
+                deadline_copy['status'] = 'passed'
+            else:
+                deadline_copy['status'] = 'upcoming'
+            results.append(deadline_copy)
+        results.sort(key=lambda x: x['deadline_date'])
+        return results
+
+    def generate_ics(self, days_ahead: int = 365, calendar_name: str = "Grant-O-Matic Deadlines") -> str:
+        """
+        Build a downloadable iCalendar (ICS) document for upcoming deadlines.
+
+        This is the primary alert channel (no email secrets required).
+        """
+        upcoming = self.get_upcoming_deadlines(days_ahead=days_ahead)
+        now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        lines = [
+            "BEGIN:VCALENDAR",
+            "VERSION:2.0",
+            "PRODID:-//Grant-O-Matic//Deadline Tracker//EN",
+            "CALSCALE:GREGORIAN",
+            "METHOD:PUBLISH",
+            f"X-WR-CALNAME:{self._ics_escape(calendar_name)}",
+        ]
+        for deadline in upcoming:
+            uid = f"{deadline['id']}-{deadline['deadline_date']}@grant-o-matic"
+            dt = deadline['deadline_date'].replace("-", "")
+            summary = f"{deadline['program_name']} deadline"
+            description_parts = [
+                f"Agency: {deadline.get('administering_agency') or 'Unknown'}",
+                f"Frequency: {deadline.get('frequency') or 'n/a'}",
+            ]
+            if deadline.get("application_window"):
+                description_parts.append(f"Window: {deadline['application_window']}")
+            if deadline.get("url"):
+                description_parts.append(f"URL: {deadline['url']}")
+            description = "\\n".join(self._ics_escape(p) for p in description_parts)
+            lines.extend(
+                [
+                    "BEGIN:VEVENT",
+                    f"UID:{uid}",
+                    f"DTSTAMP:{now}",
+                    f"DTSTART;VALUE=DATE:{dt}",
+                    f"SUMMARY:{self._ics_escape(summary)}",
+                    f"DESCRIPTION:{description}",
+                ]
+            )
+            if deadline.get("url"):
+                lines.append(f"URL:{deadline['url']}")
+            lines.append("END:VEVENT")
+        lines.append("END:VCALENDAR")
+        return "\r\n".join(lines) + "\r\n"
+
+    @staticmethod
+    def _ics_escape(value: str) -> str:
+        return (
+            (value or "")
+            .replace("\\", "\\\\")
+            .replace(";", "\\;")
+            .replace(",", "\\,")
+            .replace("\n", "\\n")
+        )
+
     def save_to_file(self, filepath: str) -> None:
         """
         Save deadlines to a JSON file

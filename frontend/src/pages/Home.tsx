@@ -10,9 +10,14 @@ export default function Home() {
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
           AI-powered grant matching system designed specifically for Canadian artists and creators
         </p>
-        <Link to="/match" className="inline-block mt-6 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-lg">
-          Start Finding Grants
-        </Link>
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link to="/match" className="inline-block px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-lg">
+            Start Finding Grants
+          </Link>
+          <Link to="/deadlines" className="inline-block px-6 py-3 border border-blue-600 text-blue-700 font-medium rounded-lg hover:bg-blue-50 transition-colors">
+            View deadlines
+          </Link>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -45,7 +50,7 @@ export default function Home() {
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">Deadline Tracking</h3>
                 <p className="text-gray-600">
-                  Never miss a grant deadline with automated alerts and calendar integration
+                  Browse dated grant deadlines from the catalog and download an ICS calendar for your reminders
                 </p>
               </div>
             </div>
