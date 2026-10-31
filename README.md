@@ -1,6 +1,6 @@
 # Grant-O-Matic
 
-[![CI](https://github.com/your-org/grant-o-matic/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/grant-o-matic/actions/workflows/ci.yml)
+[![CI](https://github.com/sgm-audio/grant-o-matic/actions/workflows/ci.yml/badge.svg)](https://github.com/sgm-audio/grant-o-matic/actions/workflows/ci.yml)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue)
 ![React 18](https://img.shields.io/badge/react-18-61DAFB)
 ![TypeScript](https://img.shields.io/badge/typescript-5.8-3178C6)
@@ -8,11 +8,11 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![Canada](https://img.shields.io/badge/for-Canadian%20Creators-red?logo=icloud&logoColor=white)](https://canadacouncil.ca)
 
-AI-powered grant matching for Canadian artists and creators. Matches your project to funding opportunities in the loaded catalog — currently [Canada Council for the Arts](https://canadacouncil.ca/funding/grants) and [FACTOR](https://www.factor.ca/).
+Grant matching for Canadian artists and creators. It scores your project against the grants in the loaded catalog on eligibility, project type, keywords and complexity. There's no LLM in the matching yet; that's on the roadmap. The catalog currently covers [Canada Council for the Arts](https://canadacouncil.ca/funding/grants) and [FACTOR](https://www.factor.ca/).
 
 ---
 
-## One-Click Setup
+## Setup
 
 ### Option A: Docker (recommended)
 ```bash
@@ -140,10 +140,9 @@ export GRANT_DATA_PATH=/path/to/data
 - [ ] Bilingual (FR/EN) UI
 - [ ] SR&ED tax credit eligibility checker
 
-These items (plus bootstrap, application assistant, ops/CI, and full audit) are packaged as Cursor Cloud Agent prompts in [`docs/agent-chain/`](docs/agent-chain/README.md). See [`docs/agent-chain/WIRING.md`](docs/agent-chain/WIRING.md) to automate them. Do not treat the chain as executed until each phase PR lands.
 
 ---
 
 ## License
 
-MIT — built for Canadian creators, by Canadian creators.
+MIT. See [LICENSE](LICENSE).
