@@ -4,6 +4,7 @@ Refined Canada Council for the Arts Grant Scraper
 import requests
 from bs4 import BeautifulSoup
 import json
+import os
 import time
 from typing import List, Dict, Optional
 import logging
@@ -224,7 +225,8 @@ if __name__ == "__main__":
     grants = scraper.extract_grant_programs()
     
     # Save to JSON file
-    with open('/var/home/SGM/dev/the-canada-creator-cog/grant-o-matic/data/canada_council_grants_refined.json', 'w') as f:
+    out_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'canada_council_grants_refined.json')
+    with open(out_path, 'w') as f:
         json.dump(grants, f, indent=2)
     
     print(f"Extracted {len(grants)} grant opportunities from Canada Council for the Arts")

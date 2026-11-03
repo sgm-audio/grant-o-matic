@@ -33,3 +33,9 @@ Thumbs.db
 
 # Data (track structured grant data, ignore scraped/raw output)
 data/canada_council_grants.json
+
+# Local agent files
+AGENTS.md
+CLAUDE.md
+.cursor/
+.claude/
